@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cxf="http://camel.apache.org/schema/cxf"
+	xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+       http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+       http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+
+	<cxf:rsServer id="restService" address="/" serviceClass="com.programa.server.services.ServicioCargaEmpleado">
+		<cxf:providers>
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
+		</cxf:providers>
+	</cxf:rsServer>
+	
+
+	<bean id="cargar" class="com.programa.server.process.CargadorObjeto" />
+	<bean id="calculo" class="com.programa.server.process.calculo" />
+	<bean id="response" class="com.programa.server.process.Mapper" />
+	
+	<bean id="envio" class="com.programa.server.process.EnviarSoap" />
+
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		   destroy-method="close">
+		   <property name="driverClassName" value="org.gjt.mm.mysql.Driver" />
+		   <property name="url" value="jdbc:mysql://url" />
+		   <property name="username" value="data" />
+		   <property name="password" value="data" />
+  	</bean>
+
+       <cxf:cxfEndpoint id="CXFTest" address="http://localhost:8085/proyecto/vr/javainuse/learn"
+		endpointName="a:SOATestEndpoint" serviceName="a:SOATestEndpointService"
+		wsdlURL="META-INF/wsdl/test.wsdl" serviceClass="com.programa.SOATestEndpoint"
+		xmlns:a="http://programa.com" /> 
+
+	<camelContext id="camelId" xmlns="http://camel.apache.org/schema/spring">
+		<route id="myRoute">
+			<from uri="cxfrs://bean://restService"/>
+			 <process ref="cargar"/>
+			 <choice>
+			 	<when>
+					<simple>${body.getNombres()} != null || ${body.getApellidos()} != null || ${body.getTipoDocumento()} != null || ${body.getNumeroDocumento()} != null || ${body.getFechaNacimiento()} != null || ${body.getFechaVinculacion()} != null || ${body.getCargo()} != null || ${body.getSalario()} != null</simple>
+						
+						<process ref="calculo"/>
+						<setHeader headerName="edad">
+								<simple>${property.edad}</simple>
+						</setHeader>
+						<setHeader headerName="tiempoEmpresa">
+								<simple>${property.tiempovinculacion}</simple>
+						</setHeader>
+						 
+						 <choice>
+			 				<when>
+								<simple>${property.anio} > 17</simple>
+									<setProperty  propertyName="backup">
+                    					<simple>${body}</simple>
+               						 </setProperty>
+									<to uri="envio"/>
+									<to  pattern="InOnly" uri="cxf://bean://CXFTest"/>
+									<setBody id="setBody">
+                						<simple>${property.backup}</simple>
+            						</setBody>            						
+            						<setHeader headerName="condicion">
+										<simple>1</simple>
+									</setHeader>
+									<process ref="response"/>
+							</when>
+							<otherwise>
+                    			<setHeader headerName="condicion">
+									<simple>0</simple>
+								</setHeader>
+								<setBody>
+									<simple>Usuario menor de edad</simple>
+								</setBody>
+								<process ref="response" />
+							</otherwise>
+						</choice>
+				</when>
+				<otherwise>
+					<setHeader headerName="condicion">
+							<simple>0</simple>
+					</setHeader>
+					<setBody>
+						<simple>Revisar atributo vacio</simple>
+					</setBody>
+					<process ref="response" />
+				</otherwise>
+			</choice>
+		</route>
+	</camelContext>
+</beans>
