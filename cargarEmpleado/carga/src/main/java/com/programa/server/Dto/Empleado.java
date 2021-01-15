@@ -52,7 +52,8 @@ public class Empleado implements Serializable{
 			        this.fechaNacimiento = date;
 			} 
 			        catch (Exception e) {
-			         e.printStackTrace();
+			        	this.fechaNacimiento = null;
+			        	System.out.println("formato fecha incorrecta "+e.getMessage());
 			      }
 	    }
 	}
@@ -71,7 +72,8 @@ public class Empleado implements Serializable{
 			        this.fechaVinculacion = date;
 			} 
 			        catch (Exception e) {
-			        	System.out.println(e.getMessage());
+			        	this.fechaVinculacion = null;
+			        	System.out.println("formato fecha incorrecta "+e.getMessage());
 			      }
 	    }
 	}

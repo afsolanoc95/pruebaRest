@@ -17,6 +17,5 @@ public class ServicioCargaEmpleado implements RestServices {
 			String fechaNacimiento, String fechaVinculacion, String cargo, Double salario) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-	
+	}	
 }

@@ -18,6 +18,6 @@ public interface RestServices {
 	public List<String> getEmployee(@PathParam("nombres") String nombres,@PathParam("apellidos") String apellidos,
 			@PathParam("tipoDocumento") String tipoDocumento,@PathParam("numeroDocumento") String numeroDocumento,
 			@PathParam("fechaNacimiento") String fechaNacimiento,@PathParam("fechaVinculacion") String fechaVinculacion,
-			@PathParam("cargo") String cargo,@PathParam("salario") Double salario);
-
+			@PathParam("cargo") String cargo,@PathParam("salario") Double salario) ;
+	
 }

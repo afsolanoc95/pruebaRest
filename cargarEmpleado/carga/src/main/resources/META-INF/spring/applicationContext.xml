@@ -38,21 +38,38 @@
 		xmlns:a="http://programa.com" /> 
 
 	<camelContext id="camelId" xmlns="http://camel.apache.org/schema/spring">
+		
+		<onException>
+            <exception>javax.ws.rs.ClientErrorException</exception>
+          
+ 			 		<setHeader headerName="condicion">
+							<simple>0</simple>
+					</setHeader>
+					<setBody>
+						<simple>Revisar atributo vacio</simple>
+					</setBody>
+             <to uri="response"/>
+        </onException>
+		
+		
+		
 		<route id="myRoute">
 			<from uri="cxfrs://bean://restService"/>
 			 <process ref="cargar"/>
+			<log  loggingLevel="INFO" message="aca ${body.getFechaNacimiento()}"/>
 			 <choice>
 			 	<when>
-					<simple>${body.getNombres()} != null || ${body.getApellidos()} != null || ${body.getTipoDocumento()} != null || ${body.getNumeroDocumento()} != null || ${body.getFechaNacimiento()} != null || ${body.getFechaVinculacion()} != null || ${body.getCargo()} != null || ${body.getSalario()} != null</simple>
-						
-						<process ref="calculo"/>
-						<setHeader headerName="edad">
-								<simple>${property.edad}</simple>
-						</setHeader>
-						<setHeader headerName="tiempoEmpresa">
-								<simple>${property.tiempovinculacion}</simple>
-						</setHeader>
-						 
+					<simple>${body.getNombres()} == null || ${body.getApellidos()} == null || ${body.getTipoDocumento()} == null || ${body.getNumeroDocumento()} == null || ${body.getFechaNacimiento()} == null || ${body.getFechaVinculacion()} == null || ${body.getCargo()} == null || ${body.getSalario()} == null</simple>
+					<setHeader headerName="condicion">
+							<simple>0</simple>
+					</setHeader>
+					<setBody>
+						<simple>Revisar atributo vacio o formato fecha incorrecto</simple>
+					</setBody>
+					<process ref="response" />
+				</when>
+				<otherwise>
+				<process ref="calculo"/>
 						 <choice>
 			 				<when>
 								<simple>${property.anio} > 17</simple>
@@ -61,6 +78,12 @@
                						 </setProperty>
 									<to uri="envio"/>
 									<to  pattern="InOnly" uri="cxf://bean://CXFTest"/>
+									<setHeader headerName="edad">
+										<simple>${property.edad}</simple>
+									</setHeader>
+									<setHeader headerName="tiempoEmpresa">
+										<simple>${property.tiempovinculacion}</simple>
+									</setHeader>
 									<setBody id="setBody">
                 						<simple>${property.backup}</simple>
             						</setBody>            						
@@ -79,15 +102,6 @@
 								<process ref="response" />
 							</otherwise>
 						</choice>
-				</when>
-				<otherwise>
-					<setHeader headerName="condicion">
-							<simple>0</simple>
-					</setHeader>
-					<setBody>
-						<simple>Revisar atributo vacio</simple>
-					</setBody>
-					<process ref="response" />
 				</otherwise>
 			</choice>
 		</route>
