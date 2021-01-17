@@ -46,7 +46,7 @@ public class Empleado implements Serializable{
 			try {
 			        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
 			        
-			        if(isValidDate(fechaNacimiento)) {
+			        if(isValidDate(fechaNacimiento.replace(" ",""))) {
 			        	Date date = simpleDateFormat.parse(fechaNacimiento);
 				        this.fechaNacimiento = date;
 			        }else {
@@ -121,7 +121,7 @@ public class Empleado implements Serializable{
 			try {
 				
 				
-				 if(isValidDate(fechaVinculacion)) {
+				 if(isValidDate(fechaVinculacion.replace(" ",""))) {
 			        	Date date = simpleDateFormat.parse(fechaVinculacion);
 				        this.fechaVinculacion = date;
 			        }else {
